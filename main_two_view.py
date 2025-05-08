@@ -72,7 +72,7 @@ def main():
         checker_files = os.listdir(checker_file_path)
         checker_files = natsort.natsorted(checker_files)
         
-        # TODO: Camera calibration using checkerboard images
+        # TODO: Camera calibration using checkerboard images # check git
         camera_intrinsic = camera_calibaration(checker_files, checker_file_path, CHECKER_BOARD)
         with open(calib_file_path, 'wb') as f:
             pickle.dump(camera_intrinsic, f)
