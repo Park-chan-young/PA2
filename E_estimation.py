@@ -36,4 +36,34 @@ def essential_matrix_estimation(kp1, kp2, matches, camera_intrinsic, eng,
     """
     # TODO: Fill this function
     
+    #cv2 to numpy
+    
+    # ex_kp1 = kp1[0]
+    # print(dir(ex_kp1))
+    # print(ex_kp1.pt)   
+    # print(type(ex_kp1.pt)) #kp1.pt: 특징점 좌표로 나옴... class tuple
+    
+    kp1_np = np.array([kp1.pt for kp_1 in kp1])
+    kp2_np = np.array([kp2.pt for kp_2 in kp2])
+    
+    # ex_matches = matches[0]
+    # print(dir(ex_matches))
+    
+    matches_list = []
+    
+    for match in matches:
+        kp1_idx = match[0].queryIdx
+        kp2_idx = match[0].trainIdx
+        
+        kp1_x, kp1_y = kp1_np[kp1_idx]
+        kp2_x, kp2_y = kp2_np[kp2_idx]
+        
+        matches_list.append(kp1_x, kp1_y, kp2_x, kp2_y)
+
+    matches_np = np.array(matches_list)
+    
+        
+    
+
+    
     return E_est, inlier_p1, inlier_p2, best_inlier_idx
