@@ -72,7 +72,7 @@ def main():
         checker_files = os.listdir(checker_file_path)
         checker_files = natsort.natsorted(checker_files)
         
-        # TODO: Camera calibration using checkerboard images # check git
+        # TODO: Camera calibration using checkerboard images
         camera_intrinsic = camera_calibaration(checker_files, checker_file_path, CHECKER_BOARD)
         with open(calib_file_path, 'wb') as f:
             pickle.dump(camera_intrinsic, f)
@@ -120,76 +120,76 @@ def main():
     print(f"\nNumber of keypoints and matches (image{args.initial_image_num}, image{args.second_image_num}): ")
     print(f"kp1 : {len(kp1)}, kp2 : {len(kp2)}, matches : {len(matches)}")
     
-    #############################################################################
-    ################### Step2: Essential Matrix Estimation ######################
-    #############################################################################
-    E_result_path = os.path.join(output_path, 'E_estimation.pkl')
-    if 2 in args.step and not os.path.isfile(E_result_path):
-        # TODO: Estimate the essential matrix using matched keypoints
-        E, inlier_p1, inlier_p2, inlier_matches_idx = essential_matrix_estimation(kp1, kp2, matches, camera_intrinsic, eng, max_iter=args.ransac_iter, threshold=args.em_threshold)
+    # #############################################################################
+    # ################### Step2: Essential Matrix Estimation ######################
+    # #############################################################################
+    # E_result_path = os.path.join(output_path, 'E_estimation.pkl')
+    # if 2 in args.step and not os.path.isfile(E_result_path):
+    #     # TODO: Estimate the essential matrix using matched keypoints
+    #     E, inlier_p1, inlier_p2, inlier_matches_idx = essential_matrix_estimation(kp1, kp2, matches, camera_intrinsic, eng, max_iter=args.ransac_iter, threshold=args.em_threshold)
         
-        data = {
-            'E': E,
-            'inlier_p1': inlier_p1,
-            'inlier_p2': inlier_p2,
-            'inlier_matches_idx': inlier_matches_idx
-        }
-        with open(E_result_path, 'wb') as f:
-            pickle.dump(data, f)
-    else:
-        with open(E_result_path, 'rb') as f:
-            data = pickle.load(f)
-        E = data['E']
-        inlier_p1 = data['inlier_p1']
-        inlier_p2 = data['inlier_p2']
+    #     data = {
+    #         'E': E,
+    #         'inlier_p1': inlier_p1,
+    #         'inlier_p2': inlier_p2,
+    #         'inlier_matches_idx': inlier_matches_idx
+    #     }
+    #     with open(E_result_path, 'wb') as f:
+    #         pickle.dump(data, f)
+    # else:
+    #     with open(E_result_path, 'rb') as f:
+    #         data = pickle.load(f)
+    #     E = data['E']
+    #     inlier_p1 = data['inlier_p1']
+    #     inlier_p2 = data['inlier_p2']
         
-    print(E)
-    print(f"Number of inlier points: {inlier_p1.shape[0]}")
+    # print(E)
+    # print(f"Number of inlier points: {inlier_p1.shape[0]}")
     
-    #############################################################################
-    ################## Step3: Essential Matrix Decomposition ####################
-    #############################################################################
-    P1_result_path = os.path.join(output_path, 'camera_pose.pkl')
-    if 3 in args.step and not os.path.isfile(P1_result_path):
-        # TODO: Estimate the essential decompostion for camera pose
-        P0, P1 = essential_matrix_decomposition(E, inlier_p1, inlier_p2, camera_intrinsic)
+    # #############################################################################
+    # ################## Step3: Essential Matrix Decomposition ####################
+    # #############################################################################
+    # P1_result_path = os.path.join(output_path, 'camera_pose.pkl')
+    # if 3 in args.step and not os.path.isfile(P1_result_path):
+    #     # TODO: Estimate the essential decompostion for camera pose
+    #     P0, P1 = essential_matrix_decomposition(E, inlier_p1, inlier_p2, camera_intrinsic)
 
-        data_pose = {'P0': P0, 'P1': P1}
-        with open(P1_result_path, 'wb') as f:
-            pickle.dump(data_pose, f)
-    else:
-        with open(P1_result_path, 'rb') as f:
-            data_pose = pickle.load(f)
-        P0 = data_pose['P0']
-        P1 = data_pose['P1']
+    #     data_pose = {'P0': P0, 'P1': P1}
+    #     with open(P1_result_path, 'wb') as f:
+    #         pickle.dump(data_pose, f)
+    # else:
+    #     with open(P1_result_path, 'rb') as f:
+    #         data_pose = pickle.load(f)
+    #     P0 = data_pose['P0']
+    #     P1 = data_pose['P1']
 
-    print("Camera 1 Pose (P0):")
-    print(P0)
-    print("Camera 2 Pose (P1):")
-    print(P1)
+    # print("Camera 1 Pose (P0):")
+    # print(P0)
+    # print("Camera 2 Pose (P1):")
+    # print(P1)
     
-    #############################################################################
-    ########################### Step4: Triangulation ############################
-    #############################################################################
-    triangulation_result_path = os.path.join(output_path, 'triangulation_results.pkl')
-    pcl_result_path = os.path.join(output_path, 'two_view_results.ply')
-    if 4 in args.step and not os.path.isfile(triangulation_result_path):
-        points_3d, inlier_idx = triangulate_points(P0, P1, inlier_p1, inlier_p2, camera_intrinsic)
+    # #############################################################################
+    # ########################### Step4: Triangulation ############################
+    # #############################################################################
+    # triangulation_result_path = os.path.join(output_path, 'triangulation_results.pkl')
+    # pcl_result_path = os.path.join(output_path, 'two_view_results.ply')
+    # if 4 in args.step and not os.path.isfile(triangulation_result_path):
+    #     points_3d, inlier_idx = triangulate_points(P0, P1, inlier_p1, inlier_p2, camera_intrinsic)
         
-        data_tri = {'points_3d': points_3d, "inlier_idx": inlier_idx}
-        with open(triangulation_result_path, 'wb') as f:
-            pickle.dump(data_tri, f)
-    else:
-        with open(triangulation_result_path, 'rb') as f:
-            data_tri = pickle.load(f)
-        points_3d, inlier_idx = data_tri['points_3d'], data_tri['inlier_idx']
+    #     data_tri = {'points_3d': points_3d, "inlier_idx": inlier_idx}
+    #     with open(triangulation_result_path, 'wb') as f:
+    #         pickle.dump(data_tri, f)
+    # else:
+    #     with open(triangulation_result_path, 'rb') as f:
+    #         data_tri = pickle.load(f)
+    #     points_3d, inlier_idx = data_tri['points_3d'], data_tri['inlier_idx']
 
-    print("Number of triangulated 3D points:", points_3d.shape[0])
+    # print("Number of triangulated 3D points:", points_3d.shape[0])
     
-    init_image_path = os.path.join(args.dataset_path, args.object, str(args.initial_image_num) + "." + args.image_mode)
-    matching_image_path = os.path.join(args.dataset_path, args.object, str((args.second_image_num)) + "." + args.image_mode)
-    colors = calculate_colors(init_image_path, matching_image_path, inlier_p1, inlier_p2, inlier_idx)
-    write_ply(pcl_result_path, points_3d, colors, [P0, P1], show_camera=args.visualize_camera_pose)
+    # init_image_path = os.path.join(args.dataset_path, args.object, str(args.initial_image_num) + "." + args.image_mode)
+    # matching_image_path = os.path.join(args.dataset_path, args.object, str((args.second_image_num)) + "." + args.image_mode)
+    # colors = calculate_colors(init_image_path, matching_image_path, inlier_p1, inlier_p2, inlier_idx)
+    # write_ply(pcl_result_path, points_3d, colors, [P0, P1], show_camera=args.visualize_camera_pose)
 
 if __name__ == '__main__':
     main()

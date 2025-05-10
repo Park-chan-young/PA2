@@ -33,4 +33,38 @@ def matching_two_image(image1_path, image2_path, threshold_knn=0.75):
     """
     #TODO: Fill this functions
     
+    img1 = cv2.imread(image1_path, cv2.IMREAD_GRAYSCALE)
+    img2 = cv2.imread(image2_path, cv2.IMREAD_GRAYSCALE)
+    
+    #kp1, kp2, des1, des2 구하기:
+    sift = cv2.SIFT_create()
+    kp1 = sift.detect(img1)
+    kp2 = sift.detect(img2)
+    kp1, des1 = sift.compute(img1, kp1)
+    kp2, des2 = sift.compute(img2, kp2)
+    
+    # matches 구하기
+    matches = []
+    bf = cv2.BFMatcher()
+    kmatch = bf.knnMatch(des1, des2, k=2) #des1의 각 descripter에 대해, 최대 k개 매칭 ... Lowe,s ratio 적용 k= 2
+    
+    # example check
+    # f, s = kmatch[0]
+    # print("first: %d, second: %d" % (f.distance, s.distance))
+    
+    if len(kmatch) == 0:
+        print("check no found!")
+        matches = []
+    
+    for its in kmatch:
+        
+        if(len(its) < 2):
+            print("check1")
+            continue
+        f, s = its
+        if f.distance < threshold_knn*s.distance:
+            matches.append(f)
+        
+    
+    
     return img1, img2, kp1, kp2, des1, des2, matches
